@@ -9,7 +9,7 @@ import threading
 class mSerial():
     ser = None
     def __init__(self):
-        print self
+        print(self)
 
     def start(self, port='/dev/ttyAMA0'):
         self.ser = serial.Serial(port,115200,timeout=10)
@@ -65,7 +65,7 @@ A11 = 24
 
 class MeAuriga():
     def __init__(self):
-        print "init MeAuriga"
+        print("init MeAuriga")
         signal.signal(signal.SIGINT, self.exit)
         self.manager = Manager()
         self.__selectors = self.manager.dict()
@@ -98,18 +98,20 @@ class MeAuriga():
     def __onRead(self,callback):
         while True:
             if(self.exiting==True):
+                print("end read")
                 break
             try:	
                 if self.device.isOpen()==True:
                     n = self.device.inWaiting()
                     for i in range(n):
                         r = ord(self.device.read())
+                        print("r :",r)
                         callback(r)
                     sleep(0.01)
                 else:	
                     sleep(0.5)
-            except Exception,ex:
-                print str(ex)
+            except Exception as ex:
+                print(str(ex))
                 self.close()
                 sleep(1)
     def __writePackage(self,pack):
@@ -199,6 +201,8 @@ class MeAuriga():
         self.__writePackage(bytearray([0xff,0x55,0x6,0x0,0x2,0xa,port]+self.short2bytes(speed)))
 
     def motorMove(self,leftSpeed,rightSpeed):
+        res = bytearray([0xff,0x55,0x7,0x0,0x2,0x5]+self.short2bytes(-leftSpeed)+self.short2bytes(rightSpeed))
+        print(res)
         self.__writePackage(bytearray([0xff,0x55,0x7,0x0,0x2,0x5]+self.short2bytes(-leftSpeed)+self.short2bytes(rightSpeed)))
 
     def servoRun(self,port,slot,angle):
@@ -345,7 +349,8 @@ class MeAuriga():
 
     def short2bytes(self,sval):
         val = struct.pack("h",sval)
-        return [ord(val[0]),ord(val[1])]
+        print(val)
+        return [val[0],val[1]]
     def char2byte(self,cval):
         val = struct.pack("b",cval)
         return ord(val[0])
